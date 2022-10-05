@@ -11,11 +11,6 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
-
--- Dumping database structure for kntl
-CREATE DATABASE IF NOT EXISTS `kntl` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
-USE `kntl`;
-
 -- Dumping structure for table kntl.vyzo_giveaway_code
 CREATE TABLE IF NOT EXISTS `vyzo_giveaway_code` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
