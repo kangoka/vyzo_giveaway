@@ -12,7 +12,8 @@ This a script to make things easier when you want to host a giveaway on your rol
 1. Git clone this repository or download the latest release
 2. Configure `config.lua` 
 3. Open `client.lua` and change the notification to yours
-4. Add `ensure vyzo_giveaway` on `server.cfg` after oxmysql and oxlib
+4. Import the sql `vyzo_giveaway.sql`
+5. Add `ensure vyzo_giveaway` on `server.cfg` after oxmysql and oxlib
 
 # Usage
 - /cga to create a new giveaway
