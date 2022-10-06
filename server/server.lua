@@ -69,7 +69,7 @@ ESX.RegisterServerCallback('vyzo_giveaway:redeemGiveaway', function(source, cb, 
                     return cb('limit')
                 else
                     local xPlayer = ESX.GetPlayerFromId(source)
-                    if result[1].reward == 'bank' or result[1] == 'money' then
+                    if result[1].reward == 'bank' or result[1].reward == 'money' then
                         xPlayer.addAccountMoney(result[1].reward, result[1].quantity)
                     else
                         if xPlayer.canCarryItem(result[1].reward, result[1].quantity) then
