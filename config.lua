@@ -2,7 +2,7 @@ Config                  = {}
 
 Config.Locale           = 'en'
 
-Config.Log              = true
+Config.Log              = false
 -- Make sure to put your Discord webhook if you set Config.Log to true
 Config.DiscordWebhook   = ''
 Config.WebhookColor     = '14423100'
@@ -20,8 +20,10 @@ Config.WebhookColor     = '14423100'
     lightgreen = 65309
 ]]--
 
-
 Config.CodeId           = 'VYZO-'
 -- Better not to put more than 9
 Config.LengthNum        = 8 
 -- The code will be like VYZO-AN458NSI
+
+-- Set to true if you want to delete the data after a code reached maximum usage
+Config.DeleteData       = false

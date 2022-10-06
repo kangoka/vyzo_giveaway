@@ -20,16 +20,27 @@ ESX.RegisterServerCallback('vyzo_giveaway:createGiveaway', function(source, cb, 
     end
 
     if data[1] ~= nil and data[1] ~= '' then
+        -- Check if the code exists
+        MySQL.query('SELECT code FROM vyzo_giveaway_code WHERE code = ?', {data[1]}, function(result)
+            if #result > 0 then
+                -- Update the data if the code is exists
+                MySQL.update('UPDATE vyzo_giveaway_code SET code = ?, maxuse = ?, reward = ?, quantity = ? WHERE code = ?', {data[1], data[2], data[3], data[4], data[1]}, function(affectedRows)
+                    if affectedRows then
+                        return cb('updated')
+                    end
+                end)
+            end
+        end)
         MySQL.insert('INSERT INTO vyzo_giveaway_code (code, maxuse, reward, quantity) VALUES (?, ?, ?, ?)', {data[1], data[2], data[3], data[4]}, function(id)
             if type(id) == 'number' then
-                return cb(true, data[1])
+                return cb('success', data[1])
             end
         end)
     else
         data[1] = Config.CodeId .. string.upper(ESX.GetRandomString(Config.LengthNum))
         MySQL.insert('INSERT INTO vyzo_giveaway_code (code, maxuse, reward, quantity) VALUES (?, ?, ?, ?)', {data[1], data[2], data[3], data[4]}, function(id)
             if type(id) == 'number' then
-                return cb(true, data[1])
+                return cb('success', data[1])
             end
         end)
     end
@@ -52,6 +63,9 @@ ESX.RegisterServerCallback('vyzo_giveaway:redeemGiveaway', function(source, cb, 
             MySQL.query('SELECT code FROM vyzo_giveaway_log WHERE code = ?', {data[1]}, function(result2)
                 -- Check the player redeeming will exceed the maximum code usage
                 if #result2 + 1 > result[1].maxuse then
+                    if Config.DeleteData then
+                        deleteData(data[1])
+                    end
                     return cb('limit')
                 else
                     local xPlayer = ESX.GetPlayerFromId(source)
@@ -68,6 +82,9 @@ ESX.RegisterServerCallback('vyzo_giveaway:redeemGiveaway', function(source, cb, 
                         if type(id) == 'number' then
                             if Config.Log then
                                 log(_U('log_message', xPlayer.getName(), data[1], result[1].quantity, result[1].reward))
+                            end
+                            if Config.DeleteData and #result2 + 1 >= result[1].maxuse then
+                                deleteData(data[1])
                             end
                             return cb('success')
                         end
@@ -137,4 +154,15 @@ function versionCheck(repository)
 			end
 		end, 'GET')
 	end)
+end
+
+function deleteData(code)
+    local queries = {
+        { query = 'DELETE FROM `vyzo_giveaway_code` WHERE `code` = (:code)', values = {['code'] = code}},
+        { query = 'DELETE FROM `vyzo_giveaway_log` WHERE `code` = (:code)', values = {['code'] = code}}
+    }
+
+    MySQL.transaction(queries, function(success)
+        print('Data code ' .. code .. ' deleted')
+    end)
 end

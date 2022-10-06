@@ -14,5 +14,6 @@ Locales['id'] = {
     ['reward']                  = 'Hadaiah',
     ['quantity']                = 'Jumlah',
     ['insert_success']          = 'Giveaway berhasil dibuat, cek F8 untuk melihat kode',
-    ['insert_failed']           = 'Gagal membuat giveaway'
+    ['insert_failed']           = 'Gagal membuat giveaway',
+    ['updated']                 = 'Data berhasil diperbarui'
 }

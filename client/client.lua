@@ -10,9 +10,11 @@ AddEventHandler("openDialogCreate", function()
     if input == nil then return end
 
     ESX.TriggerServerCallback('vyzo_giveaway:createGiveaway', function(cb, code)
-        if cb then
+        if cb == 'success' then
             ESX.ShowNotification('Giveaway', _U('insert_success'), 'success')
-            print('Generated code: ' .. code)
+            print('Code: ' .. code)
+        elseif cb == 'updated' then
+            ESX.ShowNotification('Giveaway', _U('updated'), 'success')
         else
             ESX.ShowNotification('Giveaway', _U('insert_failed'), 'error')
         end

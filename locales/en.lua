@@ -14,5 +14,6 @@ Locales['en'] = {
     ['reward']                  = 'Reward',
     ['quantity']                = 'Qty',
     ['insert_success']          = 'Insert to database success, check F8 to see the code',
-    ['insert_failed']           = 'Insert to database failed'
+    ['insert_failed']           = 'Insert to database failed',
+    ['updated']                 = 'Data updated'
 }
