@@ -4,7 +4,7 @@ lua54       'yes'
 
 name        'vyzo_giveaway'
 author      'vyzo'
-version     '1.0.0'
+version     '1.1.0'
 repository  'soon'
 description 'A script for admin to create a code for players to redeem'
 
