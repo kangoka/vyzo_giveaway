@@ -4,6 +4,7 @@ AddEventHandler("openDialogCreate", function()
         { type = "input", label = _U('code'), placeholder = "VYZO-XXXXXXXX" },
         { type = "number", label = _U('maxUse'), default = 1 },
         { type = "input", label = _U('reward') },
+        { type = "checkbox", label = "Can player redeem this code more than one?", checked = true },
         { type = "number", label = _U('quantity'), default = 1 }
     })
 
@@ -40,6 +41,8 @@ AddEventHandler("openDialogRedeem", function()
             ESX.ShowNotification('Giveaway', _U('limit'), 'error')
         elseif cb == 'full' then
             ESX.ShowNotification('Giveaway', _U('full'), 'error')
+        elseif cb == 'same_user' then
+            ESX.ShowNotification('Giveaway', _U('same_user'), 'error')
         end
     end, input)
 end)
