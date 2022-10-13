@@ -18,6 +18,7 @@ This a script to make things easier when you want to host a giveaway on your rol
 # Usage
 - /cga to create a new giveaway
 - /redeem to redeem a code
+- Format to give reward type car: car_**CARMODEL**_**PLATE**. Example: car_adder_VYZO or car_adder
 
 # Features
 - 0.00ms resmon when idle and 0.001ms for a blink of an eye when executing the command
@@ -28,8 +29,13 @@ This a script to make things easier when you want to host a giveaway on your rol
 - Available in two languages English and Bahasa Indonesia
 - Supported reward type: `money`, `bank`, `items` (for ox_inventory users, items are not attached to database so you can give weapons too)
 
+# Note
+- Tested with ESX Legacy 1.8.5 and working fine
+- You need to have esx_vehicleshop running or at least have the sql table imported if you want to make the reward type car
+- Change the notification in `client/client.lua` to your notification
+
 # Preview
-https://imgur.com/a/9GSIAzA
+https://imgur.com/a/RqLFTeU
 
 # Todo
-- [ ] Add reward type: `car`
+- [x] Add reward type: `car`
