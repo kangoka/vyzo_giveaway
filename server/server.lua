@@ -63,74 +63,111 @@ ESX.RegisterServerCallback('vyzo_giveaway:redeemGiveaway', function(source, cb, 
     -- end
 
     -- Check if the code exist
-    MySQL.query('SELECT code, maxuse, sameuser, reward, quantity FROM vyzo_giveaway_code WHERE code = ?', { data[1] },
-        function(result)
-            if #result > 0 then
-                MySQL.query('SELECT identifier, code FROM vyzo_giveaway_log WHERE code = ?', { data[1] },
-                    function(result2)
-                        local player = getPlayerIdentifier(source)
-                        -- Check if a player can redeem the same code more than one
-                        if result[1].sameuser == 0 then
-                            for k, v in pairs(result2) do
-                                if player == v.identifier then
-                                    return cb('same_user')
-                                end
-                            end
+    MySQL.query('SELECT code, maxuse, reward, quantity FROM vyzo_giveaway_code WHERE code = ?', {data[1]}, function(result)
+        if #result > 0 then
+            MySQL.query('SELECT code FROM vyzo_giveaway_log WHERE code = ?', {data[1]}, function(result2)
+                -- Check the player redeeming will exceed the maximum code usage
+                if #result2 + 1 > result[1].maxuse then
+                    if Config.DeleteData then
+                        deleteData(data[1])
+                    end
+                    return cb('limit')
+                else
+                    local xPlayer = ESX.GetPlayerFromId(source)
+                    if result[1].reward == 'bank' or result[1] == 'money' then
+                        xPlayer.addAccountMoney(result[1].reward, result[1].quantity)
+                    else
+                        if xPlayer.canCarryItem(result[1].reward, result[1].quantity) then
+                            xPlayer.addInventoryItem(result[1].reward, result[1].quantity)
+                        else
+                            return cb('full')
                         end
-                        -- Check the player redeeming will exceed the maximum code usage
-                        if #result2 + 1 > result[1].maxuse then
-                            if Config.DeleteData then
+                    end
+                    MySQL.insert('INSERT INTO vyzo_giveaway_log (identifier, code) VALUES (?, ?)', {getPlayerIdentifier(source), data[1]}, function(id)
+                        if type(id) == 'number' then
+                            if Config.Log then
+                                log(_U('log_message', xPlayer.getName(), data[1], result[1].quantity, result[1].reward))
+                            end
+                            if Config.DeleteData and #result2 + 1 >= result[1].maxuse then
                                 deleteData(data[1])
                             end
-                            return cb('limit')
-                        else
-                            local xPlayer = ESX.GetPlayerFromId(source)
-                            if result[1].reward == 'bank' or result[1].reward == 'money' then
-                                xPlayer.addAccountMoney(result[1].reward, result[1].quantity)
-                            elseif string.match(result[1].reward, 'car_') then
-                                -- Thanks to https://stackoverflow.com/a/65023405 for the split function. Lua have split function when?
-                                local args = {}
-                                for a in result[1].reward:gmatch("([^_]+)") do
-                                    table.insert(args, a)
-                                end
-
-                                if args[3] == nil then
-                                    args[3] = Config.Plate .. string.upper(ESX.GetRandomString(Config.PlateNum))
-                                end
-
-                                MySQL.insert('INSERT INTO owned_vehicles (owner, plate, vehicle, stored, parking) VALUES (?, ?, ?, ?, ?)'
-                                    ,
-                                    { player, args[3],
-                                        json.encode({ model = joaat(args[2]), plate = args[3] }), 1, Config.DefaultGarage
-                                    }, function(rowsChanged)
-                                    if (rowsChanged) then
-                                        return cb('success')
-                                    end
-                                end)
-                            else
-                                if xPlayer.canCarryItem(result[1].reward, result[1].quantity) then
-                                    xPlayer.addInventoryItem(result[1].reward, result[1].quantity)
-                                else
-                                    return cb('full')
-                                end
-                            end
-                            MySQL.insert('INSERT INTO vyzo_giveaway_log (identifier, code) VALUES (?, ?)',
-                                { player, data[1] }, function(id)
-                                if type(id) == 'number' then
-                                    if Config.Log then
-                                        log(_U('log_message', xPlayer.getName(), data[1], result[1].quantity,
-                                            result[1].reward))
-                                    end
-                                    if Config.DeleteData and #result2 + 1 >= result[1].maxuse then
-                                        deleteData(data[1])
-                                    end
-                                    return cb('success')
-                                end
-                            end)
+                            return cb('success')
                         end
                     end)
-            else
-                return cb('not_exist')
-            end
-        end)
+                end
+            end)
+        else
+            return cb('not_exist')
+        end
+    end)
 end)
+
+function getPlayerIdentifier(player)
+    for k,v in pairs(GetPlayerIdentifiers(player))do
+        if string.sub(v, 1, string.len("license:")) == "license:" then
+            identifier = string.sub(v, 9, string.len(v))
+        end
+    end
+    return identifier
+end
+
+function log(message)
+    local webHook = Config.DiscordWebhook
+    local embedData = {{
+        ['title'] = 'Code Claimed',
+        ['color'] = Config.WebhookColor,
+        ['description'] = message,
+        ['author'] = {
+            ['name'] = "Code Claim Logger",
+            ['icon_url'] = "https://avatars.githubusercontent.com/u/51883097?v=4"
+        }
+    }}
+    PerformHttpRequest(webHook, nil, 'POST', json.encode({
+        username = 'Code Claim Logger',
+        embeds = embedData
+    }), {
+        ['Content-Type'] = 'application/json'
+    })
+end
+
+-- Credits to ox_lib
+function versionCheck(repository)
+	local resource = GetInvokingResource() or GetCurrentResourceName()
+	local currentVersion = GetResourceMetadata(resource, 'version', 0)
+
+	if currentVersion then
+		currentVersion = currentVersion:match('%d%.%d+%.%d+')
+	end
+
+	if not currentVersion then return print(("^1Unable to determine current resource version for '%s' ^0"):format(resource)) end
+
+	SetTimeout(1000, function()
+		PerformHttpRequest(('https://api.github.com/repos/%s/releases/latest'):format(repository), function(status, response)
+			if status ~= 200 then return end
+
+			response = json.decode(response)
+			if response.prerelease then return end
+
+			local latestVersion = response.tag_name:match('%d%.%d+%.%d+')
+			if not latestVersion or latestVersion == currentVersion then return end
+
+			local cMajor, cMinor = string.strsplit('.', currentVersion, 2)
+			local lMajor, lMinor = string.strsplit('.', latestVersion, 2)
+
+			if tonumber(cMajor) < tonumber(lMajor) or tonumber(cMinor) < tonumber(lMinor) then
+				return print(('^3An update is available for %s (current version: %s)\r\n%s^0'):format(resource, currentVersion, response.html_url))
+			end
+		end, 'GET')
+	end)
+end
+
+function deleteData(code)
+    local queries = {
+        { query = 'DELETE FROM `vyzo_giveaway_code` WHERE `code` = (:code)', values = {['code'] = code}},
+        { query = 'DELETE FROM `vyzo_giveaway_log` WHERE `code` = (:code)', values = {['code'] = code}}
+    }
+
+    MySQL.transaction(queries, function(success)
+        print('Data code ' .. code .. ' deleted')
+    end)
+end

@@ -15,4 +15,5 @@ Locales['nl'] = {
     ['quantity']                = 'Aantal',
     ['insert_success']          = 'Succesvol aan de database toegevoegd, kijk F8 om de code te bekijken',
     ['insert_failed']           = 'Het is niet gelukt om deze aan de database toe te voegen.'
+    ['updated']                 = 'Data ververst'
 }
