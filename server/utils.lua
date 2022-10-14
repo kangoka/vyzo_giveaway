@@ -10,16 +10,16 @@ end
 function log(message)
     local webHook = Config.DiscordWebhook
     local embedData = { {
-        ['title'] = 'Code Claimed',
+        ['title'] = 'Giveaway Logger',
         ['color'] = Config.WebhookColor,
         ['description'] = message,
         ['author'] = {
-            ['name'] = "Code Claim Logger",
+            ['name'] = "Giveaway Logger",
             ['icon_url'] = "https://avatars.githubusercontent.com/u/51883097?v=4"
         }
     } }
     PerformHttpRequest(webHook, nil, 'POST', json.encode({
-        username = 'Code Claim Logger',
+        username = 'Giveaway Logger',
         embeds = embedData
     }), {
         ['Content-Type'] = 'application/json'

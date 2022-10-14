@@ -19,6 +19,7 @@ ESX.RegisterServerCallback('vyzo_giveaway:createGiveaway', function(source, cb, 
         return cb(false)
     end
 
+    local xPlayer = ESX.GetPlayerFromId(source)
     if data[1] ~= nil and data[1] ~= '' then
         -- Check if the code exists
         MySQL.query('SELECT code FROM vyzo_giveaway_code WHERE code = ?', { data[1] }, function(result)
@@ -27,6 +28,9 @@ ESX.RegisterServerCallback('vyzo_giveaway:createGiveaway', function(source, cb, 
                 MySQL.update('UPDATE vyzo_giveaway_code SET code = ?, maxuse = ?, reward = ?, sameuser = ?, quantity = ? WHERE code = ?'
                     , { data[1], data[2], data[3], data[4], data[5], result[1].code }, function(affectedRows)
                     if affectedRows then
+                        if Config.Log then
+                            log(_U('log_message_create', xPlayer.getName(), data[1], data[5], data[4]))
+                        end
                         return cb('updated')
                     end
                 end)
@@ -35,6 +39,9 @@ ESX.RegisterServerCallback('vyzo_giveaway:createGiveaway', function(source, cb, 
                     ,
                     { data[1], data[2], data[3], data[4], data[5] }, function(id)
                     if type(id) == 'number' then
+                        if Config.Log then
+                            log(_U('log_message_create', xPlayer.getName(), data[1], data[5], data[4]))
+                        end
                         return cb('success', data[1])
                     end
                 end)
@@ -45,6 +52,9 @@ ESX.RegisterServerCallback('vyzo_giveaway:createGiveaway', function(source, cb, 
         MySQL.insert('INSERT INTO vyzo_giveaway_code (code, maxuse, reward, sameuser, quantity) VALUES (?, ?, ?, ?, ?)',
             { data[1], data[2], data[3], data[4], data[5] }, function(id)
             if type(id) == 'number' then
+                if Config.Log then
+                    log(_U('log_message_create', xPlayer.getName(), data[1], data[5], data[4]))
+                end
                 return cb('success', data[1])
             end
         end)
@@ -118,7 +128,7 @@ ESX.RegisterServerCallback('vyzo_giveaway:redeemGiveaway', function(source, cb, 
                                 { player, data[1] }, function(id)
                                 if type(id) == 'number' then
                                     if Config.Log then
-                                        log(_U('log_message', xPlayer.getName(), data[1], result[1].quantity,
+                                        log(_U('log_message_redeem', xPlayer.getName(), data[1], result[1].quantity,
                                             result[1].reward))
                                     end
                                     if Config.DeleteData and #result2 + 1 >= result[1].maxuse then
