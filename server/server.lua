@@ -29,7 +29,7 @@ ESX.RegisterServerCallback('vyzo_giveaway:createGiveaway', function(source, cb, 
                     , { data[1], data[2], data[3], data[4], data[5], result[1].code }, function(affectedRows)
                     if affectedRows then
                         if Config.Log then
-                            log(_U('log_message_create', xPlayer.getName(), data[1], data[5], data[4]))
+                            log(_U('log_message_create', xPlayer.getName(), data[1], data[5], data[3]))
                         end
                         return cb('updated')
                     end
@@ -40,7 +40,7 @@ ESX.RegisterServerCallback('vyzo_giveaway:createGiveaway', function(source, cb, 
                     { data[1], data[2], data[3], data[4], data[5] }, function(id)
                     if type(id) == 'number' then
                         if Config.Log then
-                            log(_U('log_message_create', xPlayer.getName(), data[1], data[5], data[4]))
+                            log(_U('log_message_create', xPlayer.getName(), data[1], data[5], data[3]))
                         end
                         return cb('success', data[1])
                     end
@@ -53,7 +53,7 @@ ESX.RegisterServerCallback('vyzo_giveaway:createGiveaway', function(source, cb, 
             { data[1], data[2], data[3], data[4], data[5] }, function(id)
             if type(id) == 'number' then
                 if Config.Log then
-                    log(_U('log_message_create', xPlayer.getName(), data[1], data[5], data[4]))
+                    log(_U('log_message_create', xPlayer.getName(), data[1], data[5], data[3]))
                 end
                 return cb('success', data[1])
             end
